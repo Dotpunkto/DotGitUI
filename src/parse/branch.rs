@@ -9,7 +9,7 @@ pub fn parse(line: &str) -> Result<Branch, String> {
         .next()
         .and_then(|l| l.strip_prefix("## "))
         .and_then(|l| l.split("...").next())
-        .ok_or_else(|| format!("Branch : parssing error\n Value: {line}"))?
+        .ok_or_else(|| format!("Branch : parssing error"))?
         .to_string();
 
     Ok(Branch { name: branch })

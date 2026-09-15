@@ -3,7 +3,7 @@ use std::process::Command;
 
 pub struct App {
     pub branch: parse::branch::Branch,
-    pub updated_files: Vec<String>,
+    pub updated_files: Vec<parse::file::File>,
     pub last_commits: Vec<parse::commit::Commit>,
 }
 
@@ -16,7 +16,11 @@ pub fn load_app() -> Result<App, String> {
 
     let branch = parse::branch::parse(&status_out)?;
 
-    let updated_files: Vec<String> = Vec::with_capacity(3);
+    let updated_files = status_out
+        .lines()
+        .filter(|l| !l.starts_with('#') && !l.is_empty())
+        .map(parse::file::parse)
+        .collect::<Result<Vec<parse::file::File>, String>>()?;
 
     let log = Command::new("git")
         .args([
