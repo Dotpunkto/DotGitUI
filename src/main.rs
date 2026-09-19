@@ -64,7 +64,10 @@ fn run(mut terminal: DefaultTerminal) -> io::Result<()> {
                 .last_commits
                 .iter()
                 .map(|c| {
-                    let line = format!("{} - {} ({})", c.short_hash, c.message, c.author);
+                    let line = format!(
+                        "{} - {} ({})-[{}]",
+                        c.short_hash, c.message, c.date, c.author
+                    );
                     ListItem::new(line)
                 })
                 .collect();
