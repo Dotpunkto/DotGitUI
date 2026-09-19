@@ -26,15 +26,14 @@ fn run(mut terminal: DefaultTerminal) -> io::Result<()> {
     loop {
         terminal.draw(|frame| {
             let area = frame.area();
-            // 1. Découpage vertical en 3 zones
+
             let chunks = Layout::vertical([
-                Constraint::Length(3), // branche
-                Constraint::Min(9),    // fichiers
-                Constraint::Min(2),    // commits
+                Constraint::Length(3),
+                Constraint::Min(9),
+                Constraint::Min(2),
             ])
             .split(area);
 
-            // 2. Branche courante
             let branch_text = format!("{}", data.branch.name);
             let branch_widget = Paragraph::new(branch_text).block(
                 Block::default()
@@ -44,7 +43,6 @@ fn run(mut terminal: DefaultTerminal) -> io::Result<()> {
 
             frame.render_widget(branch_widget, chunks[0]);
 
-            // 3. Fichiers modifiés
             let files_items: Vec<ListItem> = data
                 .updated_files
                 .iter()
@@ -62,7 +60,6 @@ fn run(mut terminal: DefaultTerminal) -> io::Result<()> {
 
             frame.render_widget(files_widget, chunks[1]);
 
-            // 4. Derniers commits
             let commits_items: Vec<ListItem> = data
                 .last_commits
                 .iter()

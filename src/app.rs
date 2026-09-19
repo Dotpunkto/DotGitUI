@@ -1,5 +1,5 @@
 use crate::parse;
-use std::process::Command;
+use std::{env::args, process::Command};
 
 pub struct App {
     pub branch: parse::branch::Branch,
@@ -8,28 +8,24 @@ pub struct App {
 }
 
 pub fn load_app() -> Result<App, String> {
-    let status = Command::new("git")
-        .args(["status", "--porcelain=v1", "--branch"])
+    let git_status_command = parse::command::parse("git status --porcelain=v1 --branch")?;
+    let status = Command::new(git_status_command.name)
+        .args(git_status_command.args)
         .output()
         .map_err(|e| format!("git status failed: {e}"))?;
     let status_out = String::from_utf8_lossy(&status.stdout);
 
     let branch = parse::branch::parse(&status_out)?;
-
     let updated_files = status_out
         .lines()
         .filter(|l| !l.starts_with('#') && !l.is_empty())
         .map(parse::file::parse)
         .collect::<Result<Vec<parse::file::File>, String>>()?;
 
-    let log = Command::new("git")
-        .args([
-            "log",
-            "-n",
-            "5",
-            "--date=short",
-            "--pretty=format:%h\t%an\t%ad\t%s",
-        ])
+    let git_log_command =
+        parse::command::parse("git log -n 5 --date=short --pretty=format:%h\t%an\t%ad\t%s")?;
+    let log = Command::new(git_log_command.name)
+        .args(git_log_command.args)
         .output()
         .map_err(|e| format!("git log failed: {e}"))?;
 
@@ -41,8 +37,8 @@ pub fn load_app() -> Result<App, String> {
         .collect();
 
     Ok(App {
-        branch,
-        updated_files,
+        branch: branch,
+        updated_files: updated_files,
         last_commits: last_commits?,
     })
 }
