@@ -1,5 +1,5 @@
 use crate::parse;
-use std::{env::args, process::Command};
+use std::process::Command;
 
 pub struct App {
     pub branch: parse::branch::Branch,
@@ -41,9 +41,4 @@ pub fn load_app() -> Result<App, String> {
         updated_files: updated_files,
         last_commits: last_commits?,
     })
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
 }

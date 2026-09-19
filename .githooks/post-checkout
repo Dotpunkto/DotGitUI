@@ -1,0 +1,34 @@
+#!/bin/sh
+
+OLD_HEAD="$1"
+NEW_HEAD="$2"
+IS_BRANCH_CHECKOUT="$3"
+
+if [ "$IS_BRANCH_CHECKOUT" != "1" ]; then
+  exit 0
+fi
+
+CURRENT_BRANCH=$(git branch --show-current)
+
+if [ -z "$CURRENT_BRANCH" ]; then
+  exit 0
+fi
+
+if [ "$OLD_HEAD" = "$NEW_HEAD" ]; then
+
+  REFLOG_COUNT=$(git reflog show "$CURRENT_BRANCH" 2>/dev/null | wc -l | tr -d ' ')
+
+  if [ "$REFLOG_COUNT" -le 2 ]; then
+    REGEX='^main$|^(feature|bugfix|improvement|hotfix)/[a-z0-9._-]+$'
+    if ! echo "$CURRENT_BRANCH" | grep -Eq "$REGEX"; then
+        echo "🛑 Branch name does not respect the required format."
+        echo "   Expected pattern: $REGEX"
+        echo ""
+
+        OLD_BRANCH=$(git name-rev --name-only "$OLD_HEAD" 2>/dev/null | sed 's/^remotes\/origin\///')
+        git checkout $OLD_BRANCH
+        git branch -D "$CURRENT_BRANCH"
+        exit 1
+    fi
+    fi1
+fi

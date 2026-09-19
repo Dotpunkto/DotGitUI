@@ -1,0 +1,48 @@
+#!/bin/sh
+
+COVERAGE_THRESHOLD="${COVERAGE_THRESHOLD:-50}"
+
+if ! command -v cargo-llvm-cov >/dev/null 2>&1; then
+    echo "🚨 cargo-llvm-cov not found. Install with:"
+    echo "   rustup component add llvm-tools-preview"
+    echo "   cargo install cargo-llvm-cov"
+    exit 1
+fi
+
+cargo llvm-cov clean --workspace >/dev/null 2>&1
+
+echo "🧪 Running tests with coverage (threshold: ${COVERAGE_THRESHOLD}%)"
+echo ""
+
+export CARGO_TERM_COLOR=always
+export RUSTUP_TERM_COLOR=always
+
+output=$(cargo llvm-cov \
+    --fail-under-lines "$COVERAGE_THRESHOLD" \
+    --color=always \
+    -- --color=always 2>&1)
+
+cov_status=$?
+
+printf '%s\n' "$output"
+
+errors=$(printf '%s' "$output" | grep -c 'error:' || true)
+warnings=$(printf '%s' "$output" | grep -c 'warning' || true)
+
+if [ "$warnings" -gt 0 ] || [ "$errors" -gt 0 ]; then
+    echo ""
+    echo "Build summary"
+    echo "🚨 Errors   : $errors"
+    echo "⚠️  Warnings : $warnings"
+    exit 1
+fi
+
+if [ "$cov_status" -ne 0 ]; then
+    echo ""
+    echo "🚨 Tests failed or coverage below threshold (${COVERAGE_THRESHOLD}%)"
+    exit 1
+fi
+
+echo ""
+echo "✅ Tests OK and coverage ≥ ${COVERAGE_THRESHOLD}%"
+exit 0
