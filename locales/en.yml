@@ -1,4 +1,7 @@
 title:
   branch: Branch
-  updated_files: Updated files
+  changes: Changes
+  staged: Staged
+  unstaged: Unstaged
+  untracked: Untracked
   commits: Commits
